@@ -2,9 +2,9 @@ name: post-tweets
 
 on:
   schedule:
-    # every 85 min keeps you under 17 tweets per day on the free API tier
-    - cron: "*/85 * * * *"
-  workflow_dispatch:      # lets you run it manually from the Actions tab
+    # every 102 min  →  ≈ 14 runs / day  (under the 17-tweet free-tier cap)
+    - cron: "*/102 * * * *"
+  workflow_dispatch:          # manual run button
 
 jobs:
   tweet:
@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # optional: cache pip downloads so installs stay fast
+      # (optional) speed up repeated runs
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -28,6 +28,14 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt
 
+      # ① rebuild notes.txt from the encrypted secret
+      - name: Rebuild notes.txt
+        run: |
+          echo "$NOTES_TXT" > notes.txt
+        env:
+          NOTES_TXT: ${{ secrets.NOTES_TXT }}
+
+      # ② run the bot (keys + pacing env-vars)
       - name: Run tweeter
         env:
           API_KEY:              ${{ secrets.API_KEY }}
