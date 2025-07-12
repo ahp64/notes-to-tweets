@@ -8,3 +8,4 @@ __pycache__/
 one-time
 one-time/*
 \#
+.github/.DS_Store
