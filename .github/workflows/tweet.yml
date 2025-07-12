@@ -42,6 +42,6 @@ jobs:
           API_SECRET:           ${{ secrets.API_SECRET }}
           ACCESS_TOKEN:         ${{ secrets.ACCESS_TOKEN }}
           ACCESS_TOKEN_SECRET:  ${{ secrets.ACCESS_TOKEN_SECRET }}
-          PAUSE_SEC:            ${{ secrets.PAUSE_SEC }}   # or "2"
-          MAX_PER_RUN:          ${{ secrets.MAX_PER_RUN }} # or "1"
+          PAUSE_SEC:            2
+          MAX_PER_RUN:          1
         run: python tweeter.py
