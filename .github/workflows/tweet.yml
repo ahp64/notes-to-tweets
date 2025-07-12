@@ -3,7 +3,7 @@ name: post-tweets
 on:
   schedule:
     # every 85 min keeps you under 17 tweets per day on the free API tier
-    - cron: "*/85 * * * *"
+    - cron: "*/102 * * * *"
   workflow_dispatch:      # lets you run it manually from the Actions tab
 
 jobs:
