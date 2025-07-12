@@ -1,0 +1,6 @@
+# virtual env
+.venv/
+# python junk
+__pycache__/
+# local secrets
+.env
