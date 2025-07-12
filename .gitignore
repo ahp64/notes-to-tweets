@@ -4,3 +4,6 @@
 __pycache__/
 # local secrets
 .env
+.DS_Store
+one-time
+one-time/*
