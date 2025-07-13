@@ -2,14 +2,12 @@
 """
 Tweet each non-blank line in notes.txt.
 
-• Lines longer than 280 chars are chunked on word boundaries.
-• Chunk 1 posts normally; later chunks reply to the previous one (thread).
-• BLANK lines are ignored. Use a blank line if you want to skip.
-• Safeguards:
-    DRY_RUN=true      → print instead of tweeting
-    MAX_PER_RUN=N     → hard cap per run
-    PAUSE_SEC=X       → delay between tweets
-    Automatic 429 back-off.
+Long lines (>280 chars) are split into 280-char chunks and threaded.
+Safeguards:
+  • DRY_RUN=true   → print only
+  • MAX_PER_RUN    → hard cap per run
+  • PAUSE_SEC      → delay between tweets
+  • automatic 429 back-off
 """
 
 from __future__ import annotations
@@ -19,7 +17,7 @@ from pathlib import Path
 import tweepy
 from dotenv import load_dotenv
 
-# ── config ──────────────────────────────────────────────────────────────
+# ── env ────────────────────────────────────────────────────────────────
 load_dotenv(Path(__file__).with_name(".env"))
 
 API_KEY             = os.getenv("API_KEY")
@@ -28,13 +26,12 @@ ACCESS_TOKEN        = os.getenv("ACCESS_TOKEN")
 ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
 
 NOTES_FILE  = Path(os.getenv("NOTES_FILE", "notes.txt"))
-PAUSE_SEC   = float(os.getenv("PAUSE_SEC", "2"))
-MAX_PER_RUN = int(os.getenv("MAX_PER_RUN", "15"))
+PAUSE_SEC   = float(os.getenv("PAUSE_SEC") or "2")
+MAX_PER_RUN = int(os.getenv("MAX_PER_RUN") or "15")
 DRY_RUN     = os.getenv("DRY_RUN", "").lower() == "true"
 
-# ── helpers ─────────────────────────────────────────────────────────────
+# ── helpers ────────────────────────────────────────────────────────────
 def chunk_text(text: str, limit: int = 280) -> list[str]:
-    """Split text into ≤limit-char chunks without cutting words."""
     words, chunks, buf, cur = text.split(), [], [], 0
     for w in words:
         need = len(w) + (1 if buf else 0)
@@ -49,11 +46,10 @@ def chunk_text(text: str, limit: int = 280) -> list[str]:
     return chunks
 
 def load_notes(path: Path) -> list[str]:
-    """Return tweet-sized strings; one tweet per non-blank line."""
     tweets: list[str] = []
     for raw in path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
-        if line:                             # skip blanks
+        if line:                             # ignore blank lines
             tweets.extend(chunk_text(line))
     return tweets
 
@@ -83,7 +79,7 @@ def post_batch(client: tweepy.Client, tweets: list[str]) -> None:
             continue
     print(f"run done, {sent} tweet(s) processed")
 
-# ── main ────────────────────────────────────────────────────────────────
+# ── main ───────────────────────────────────────────────────────────────
 def main() -> None:
     print("DBG – API_KEY loaded?", bool(API_KEY))
     tweets = load_notes(NOTES_FILE)
