@@ -2,11 +2,11 @@ name: post-tweets
 
 on:
   schedule:
-    - cron: "*/85 * * * *"
+    - cron: "*/102 * * * *"     # every 102 minutes
   workflow_dispatch:
 
 permissions:
-  contents: read          # we only pull/push code, no need for write
+  contents: write               # allow the bot to push offset updates
 
 jobs:
   tweet:
@@ -28,12 +28,14 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt
 
-      # rebuild private notes.txt from the multi-line secret
       - name: Rebuild notes.txt
-        run: |
-          echo "$NOTES_TXT" > notes.txt
+        run: echo "$NOTES_TXT" > notes.txt
         env:
           NOTES_TXT: ${{ secrets.NOTES_TXT }}
+      - name: Configure push auth
+        run: |
+        git remote set-url origin \
+          https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
       - name: Run tweeter
         env:
